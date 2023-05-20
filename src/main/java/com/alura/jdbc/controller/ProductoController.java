@@ -12,67 +12,23 @@ import java.util.Map;
 
 public class ProductoController {
 
-    public int modificar(String nombre, String descripcion, Integer cantidad, Integer id) throws SQLException {
-        final Connection con = new ConnectionFactory().recuperarConexion();
-        try (con) {
-
-            final PreparedStatement statement = con.prepareStatement("UPDATE PRODUCTO SET "
-                    + " NOMBRE = ?"
-                    + ", DESCRIPCION = ?"
-                    + ", CANTIDAD = ?"
-                    + " WHERE ID =?");
-            try (statement) {
-                statement.setString(1, nombre);
-                statement.setString(2, descripcion);
-                statement.setInt(3, cantidad);
-                statement.setInt(4, id);
-
-                statement.execute();
-
-                int updateCount = statement.getUpdateCount();
-                return updateCount;
-            }
-        }
+    private ProductoDAO productoDAO;
+    public ProductoController(){
+        this.productoDAO = new ProductoDAO(new ConnectionFactory().recuperarConexion());
+    }
+    public int modificar(String nombre, String descripcion, Integer cantidad, Integer id){
+       return productoDAO.modificar(nombre,descripcion,cantidad,id);
     }
 
-    public int eliminar(Integer id) throws SQLException {
-        final Connection con = new ConnectionFactory().recuperarConexion();
-
-        try (con) {
-            final PreparedStatement statement = con.prepareStatement("DELETE FROM PRODUCTO WHERE ID = ?");
-            try (statement) {
-                statement.setInt(1, id);
-                statement.execute();
-                int updateCount = statement.getUpdateCount();
-                return updateCount;
-            }
-        }
+    public int eliminar(Integer id) {
+       return productoDAO.eliminar(id);
     }
 
-    public List<Map<String, String>> listar() throws SQLException {
-        final Connection con = new ConnectionFactory().recuperarConexion();
-
-        try (con) {
-            final PreparedStatement statement = con.prepareStatement("SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD FROM PRODUCTO");
-            try (statement) {
-                statement.execute();
-                ResultSet resultSet = statement.getResultSet();
-                List<Map<String, String>> resultado = new ArrayList<>();
-                while (resultSet.next()) {
-                    Map<String, String> fila = new HashMap<>();
-                    fila.put("ID", String.valueOf(resultSet.getInt("ID")));
-                    fila.put("NOMBRE", resultSet.getString("NOMBRE"));
-                    fila.put("DESCRIPCION", resultSet.getString("DESCRIPCION"));
-                    fila.put("CANTIDAD", String.valueOf(resultSet.getInt("CANTIDAD")));
-                    resultado.add(fila);
-                }
-                return resultado;
-            }
-        }
+    public List<Producto> listar() {
+        return productoDAO.listar();
     }
 
-    public void guardar(Producto producto) throws SQLException {
-        ProductoDAO productoDAO = new ProductoDAO(new ConnectionFactory().recuperarConexion());
+    public void guardar(Producto producto) {
         productoDAO.guargar(producto);
     }
 }
